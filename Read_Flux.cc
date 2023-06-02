@@ -15,6 +15,7 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
 
+	//Imprimir las primeras lineas para entender el archivo .shw
 	std::string line;
 	int lineCount = 0;
 	while ((std::getline(inputFile, line))&& lineCount < 15 ) {
