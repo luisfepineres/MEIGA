@@ -24,17 +24,22 @@ Meiga is a framework designed to develop astroparticle simulations and their pos
 Prior to install and use Meiga, the following packages need to be installed:
 
 - **Geant4**:\
-  Meiga uses Geant4 as a toolkit for simulating the interaction of particles with the detector. Current version used is **geant4-07.p03** and can be downloaded from the [source page](https://geant4.web.cern.ch/support/download_archive). Geant4 must be built with X11 OpenGL drivers (in order to enable visualization) and with DATA packages enabled:
+  Meiga uses Geant4 as a toolkit for simulating the interaction of particles with the detector. Current version used is **geant4-v10.7.3** and can be downloaded from the [source page](https://geant4.web.cern.ch/support/download_archive). 
+ 
+  Geant4 must be built with X11 OpenGL drivers (in order to enable visualization) and with DATA packages enabled:
 ```bash
 $cmake -DCMAKE_INSTALL_PREFIX=<path-to-install> -DGEANT4_INSTALL_DATA=ON -DGEANT_USE_OPENGL_X11=ON <path-to-source>
 ```
   See [Geant4 installation guide](https://geant4-userdoc.web.cern.ch/UsersGuides/InstallationGuide/html/) for details.
+   Simple Tutorial is described in :
+      Geant4 Tutorial 1: Installation and Testing of Geant4 https://www.youtube.com/watch?v=Lxb4WZyKeCE&t=937s
 
 - **[boost](https://www.boost.org/)** (version > 1.75)\
   Can be installed via
 ```bash
 sudo apt-get install libboost-all-dev
 ```
+How to install Boost C++ library on Ubuntu 20.04 or 22.04 : https://linux.how2shout.com/how-to-install-boost-c-on-ubuntu-20-04-or-22-04/
 
 - **[nlohmann-json](https://github.com/nlohmann/json.git)** \
   For JSON parsers. Can be installed via:
@@ -299,6 +304,7 @@ For this example, the `G4WCDSimulator` application was run using the following s
 "Input" : {
   "Mode" : "UseARTI",
   "InputFileName" : "../../../src/Documentation/SampleFlux/salida_bga_30.shw",
+   "InputNParticles" : 0
 },
 "Output" : {
   "OutputFile" : "./output.json",
