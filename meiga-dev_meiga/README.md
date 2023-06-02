@@ -1,4 +1,4 @@
-# meiga
+# Meiga
 
 ![Cover](src/Documentation/wcd.png)
 <!-- TABLE OF CONTENTS -->
