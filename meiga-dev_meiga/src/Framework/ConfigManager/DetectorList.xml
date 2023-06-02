@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+
+<detectorList>
+	  
+	  <injectionMode type="eCircle">
+		      <!-- injection parameters -->
+		      <x unit="m"> 0 </x>
+			          <y unit="m"> 0 </y>
+					      <z unit="m"> 1 </z>
+						          <radius unit="m"> 1 </radius>
+								      <height unit="m"> 1.5 </height>
+									        </injectionMode>
+
+											  <detector id="0" type="eScintillator">
+												      <x unit="cm"> 0.0 </x>
+													          <y unit="cm"> 0.0 </y>
+															      <z unit="cm"> 0.0 </z>
+																          <barWidth unit="cm"> 4 </barWidth>
+																		      <barThickness unit="cm"> 1 </barThickness>
+																			          <barLength unit="cm"> 32 </barLength>
+																					      <numberOfBars> 4 </numberOfBars>
+																						        </detector>
+
+																						</detectorList>

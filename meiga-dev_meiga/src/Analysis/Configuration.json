@@ -1,0 +1,12 @@
+
+"Input" : {
+	   "Mode" : "UseARTI",
+	   "InputFileName" : "/home/luis/Meiga-software/meiga-dev_meiga/src/Documentation/SampleFlux/salida_bga_30.shw"
+},
+
+"Output" : {
+	    "OutputFile" : "./output.json",
+	    "SaveInput" : true,
+	    "SaveComponentsPETimeDistributions" : true,
+	    "SaveEnergy" : true
+}

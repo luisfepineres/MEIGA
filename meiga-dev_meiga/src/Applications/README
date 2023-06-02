@@ -1,0 +1,11 @@
+Applications directory for Simulations using Geant4
+
+G4ExSimulator:
+Example application intended to be used as template for customized user applications.
+
+G4WCDSimulator:
+Simulation of a Water-Cerenkov Detector with configurable dimensions (radius and height) and with one PMT at the top of the tank.
+
+
+
+
