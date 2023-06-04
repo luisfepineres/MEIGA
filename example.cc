@@ -1,216 +1,91 @@
-#include <TCanvas.h>
-#include <TGraph.h>
-#include <TH1D.h>
-#include <TLegend.h>
-#include <TMultiGraph.h>
-#include <TROOT.h>
+Este es un formato .shw que contiene  12 columnas referentes a la informacion suministrada por Corsika. Las columnas son :                                                                     
+ primera columna : Id                                                                                                                                   
+ segunda columna : px 
+ tercera columna : py 
+ cuarta columna : pz 
+ quinta columna : x 
+ sexta columna : y 
+ septima columna : z 
+ octava columna : shower_id 
+ novena columna : prm_id 
+ decima columna : prm_energy 
+undecima columna : prm_theta 
+duodecima columna : prm_phi
+
+Deseo guardar todo en un solo archivo .root que cree un arbol. Que anada el nu,ero del evento y todas las columnas como brachs
+0005 -1.67029e+00 +2.52492e-01 +3.79519e+00 -2.26858e+03 -3.77545e+03 +9.54478e+02 00000001 0703 +1.41286e+02 +22.098 +149.536
+
 #include <TFile.h>
+#include <TTree.h>
 
-#include <iostream>
-#include <string>
-#include <json/json.h>
-#include <json/value.h>
-#include <fstream>
-#include <vector>
-
-using namespace std;
-
-
-string completepath(string s, string cfiledir) {
-    if (s[0] == '/') {
-        return s;
-    } else {
-        return cfiledir + "/" + s;
-    }
-}
-
-void Process(const string& cfgfile, map<string, Json::Value>& processedData, map<string, bool>& processedcfg) {
-    ifstream cfgfile2(cfgfile);
-    if (!cfgfile2) {
-        cout << "[ERROR] Process: Configuration file " << cfgfile << " does not exist. Wrong path or misspelled filename." << endl;
-        return;
-    }
-    Json::Value cfgdata;
-    cfgfile2 >> cfgdata;
-    Json::Value outputcfg = cfgdata["Output"];
-    string cfgfiledir = cfgfile.substr(0, cfgfile.find_last_of('/'));
-
-    bool compressOutput = outputcfg.get("CompressOutput", false).asBool();
-    string ifile = completepath(outputcfg.get("OutputFile", "").asString(), cfgfiledir);
-    if (compressOutput) {
-        ifile += ".gz";
-    }
-    if (!ifstream(ifile)) {
-        cout << "[ERROR] Process: Input file " << ifile << " does not exist. Wrong path or misspelled filename." << endl;
+void ConvertToRoot(const std::string& inputFile, const std::string& outputFile) {
+    std::ifstream input(inputFile);
+    if (!input.is_open()) {
+        std::cout << "Error: Failed to open input file." << std::endl;
         return;
     }
 
-    bool saveInput = outputcfg.get("SaveInput", false).asBool();
-    bool savePETimeDistribution = outputcfg.get("SavePETimeDistribution", false).asBool();
-    bool saveComponentsPETimeDistribution = outputcfg.get("SaveComponentsPETimeDistribution", false).asBool();
-    bool saveEnergy = outputcfg.get("SaveEnergy", false).asBool();
-    bool saveComponentsEnergy = outputcfg.get("SaveComponentsEnergy", false).asBool();
+    // Create ROOT file and tree
+    TFile file(outputFile.c_str(), "RECREATE");
+    TTree tree("data", "Data Tree");
 
-    if (saveComponentsPETimeDistribution) {
-        savePETimeDistribution = false;
-    }
-    if (saveComponentsEnergy) {
-        saveEnergy = false;
-    }
+    // Define variables for each column
+    Int_t event;
+    Int_t id;
+    Double_t px, py, pz;
+    Double_t x, y, z;
+    Int_t shower_id, prm_id;
+    Double_t prm_energy, prm_theta, prm_phi;
 
-    cout << endl;
-    cout << "[INFO] Process: Reading output file: " << ifile << endl;
-    Json::Value data;
-    if (compressOutput) {
-        gzifstream infile(ifile);
-        infile >> data;
-    } else {
-        ifstream infile(ifile);
-        infile >> data;
-    }
+    // Set branch addresses
+    tree.Branch("event", &event, "event/I");
+    tree.Branch("id", &id, "id/I");
+    tree.Branch("px", &px, "px/D");
+    tree.Branch("py", &py, "py/D");
+    tree.Branch("pz", &pz, "pz/D");
+    tree.Branch("x", &x, "x/D");
+    tree.Branch("y", &y, "y/D");
+    tree.Branch("z", &z, "z/D");
+    tree.Branch("shower_id", &shower_id, "shower_id/I");
+    tree.Branch("prm_id", &prm_id, "prm_id/I");
+    tree.Branch("prm_energy", &prm_energy, "prm_energy/D");
+    tree.Branch("prm_theta", &prm_theta, "prm_theta/D");
+    tree.Branch("prm_phi", &prm_phi, "prm_phi/D");
 
-    vector<string> detectors;
-    vector<string> optdevices;
-    Json::Value::Members members = data.getMemberNames();
-    for (const auto& name : members) {
-        if (name.find("Detector") != string::npos) {
-            detectors.push_back(name);
-        } else if (name.find("OptDevice") != string::npos) {
-            optdevices.push_back(name);
+    std::string line;
+    int lineNum = 0;
+    while (std::getline(input, line)) {
+        std::istringstream iss(line);
+        if (!(iss >> id >> px >> py >> pz >> x >> y >> z >> shower_id >> prm_id >> prm_energy >> prm_theta >> prm_phi)) {
+            std::cout << "Error: Invalid input format at line " << lineNum + 1 << std::endl;
+            continue;
         }
+
+        // Set values for each variable
+        event = lineNum;
+        // Fill the tree with the current event
+        tree.Fill();
+
+        lineNum++;
     }
 
-    cout << "[INFO] Process: Found information of Detector(s):" << endl;
-    for (const auto& det : detectors) {
-        cout << det << endl;
-    }
+    // Write the tree to the file and close it
+    file.Write();
+    file.Close();
 
-    cout << "[INFO] Process: Found information of Optical Device(s):" << endl;
-    for (const auto& optdev : optdevices) {
-        cout << optdev << endl;
-    }
-
-    map<string, Json::Value> processedData;
-
-    if (saveInput) {
-        processedData["InputFlux"] = GetInputFlux(data);
-    }
-    if (saveEnergy) {
-        processedData["DepositedEnergy"] = GetDepositedEnergy(data, detectors);
-    }
-    if (saveComponentsEnergy) {
-processedData["ComponentsDepositedEnergy"] = GetComponentsDepositedEnergy(data, detectors);
-}
-if (saveComponentsPETimeDistribution) {
-processedData["ComponentsPETimeDistribution"] = GetComponentsTraces(data, optdevices);
-}
-if (savePETimeDistribution) {
-processedData["PETimeDistribution"] = GetTraces(data, optdevices);
-}
-
-processedData.swap(processedData);
-processedcfg["InputFlux"] = saveInput;
-processedcfg["PETimeDistribution"] = savePETimeDistribution;
-processedcfg["ComponentsPETimeDistribution"] = saveComponentsPETimeDistribution;
-processedcfg["DepositedEnergy"] = saveEnergy;
-processedcfg["ComponentsDepositedEnergy"] = saveComponentsEnergy;
-
+    std::cout << "Conversion completed successfully. ROOT file saved as " << outputFile << std::endl;
 }
 
 int main(int argc, char* argv[]) {
-if (argc != 2) {
-cout << "Uso: programa archivo_configuracion.json" << endl;
-return 1;
+    if (argc != 3) {
+        std::cout << "Usage: ./ConvertToRoot <inputFile.shw> <outputFile.root>" << std::endl;
+        return 1;
+    }
+
+    std::string inputFile(argv[1]);
+    std::string outputFile(argv[2]);
+
+    ConvertToRoot(inputFile, outputFile);
+
+    return 0;
 }
-
-string cfgfile(argv[1]);
-
-map<string, Json::Value> processedData;
-map<string, bool> processedcfg;
-
-Process(cfgfile, processedData, processedcfg);
-
-TFile* outputFile = new TFile("output.root", "RECREATE");
-
-for (const auto& entry : processedData) {
-    const string& dataType = entry.first;
-    const Json::Value& data = entry.second;
-
-    if (dataType == "InputFlux") {
-        TGraph* graph = new TGraph(data.size());
-        for (int i = 0; i < data.size(); ++i) {
-            const Json::Value& point = data[i];
-            double x = point["x"].asDouble();
-            double y = point["y"].asDouble();
-            graph->SetPoint(i, x, y);
-        }
-        graph->SetName("input_flux");
-        graph->Write();
-    }
-
-    // ...
-    // Añade más bloques de código para guardar los otros tipos de datos procesados en el archivo de salida de Root
-      if (dataType == "DepositedEnergy") {
-        TH1D* hist = new TH1D("deposited_energy", "Deposited Energy", 100, 0, 100);
-        for (int i = 0; i < data.size(); ++i) {
-            const Json::Value& point = data[i];
-            double energy = point["energy"].asDouble();
-            hist->Fill(energy);
-        }
-        hist->Write();
-    }
-    
-    if (dataType == "ComponentsDepositedEnergy") {
-        TCanvas* canvas = new TCanvas("components_deposited_energy", "Components Deposited Energy");
-        int numComponents = data.getMemberNames().size();
-        int numBins = 100;
-        double minEnergy = 0.0;
-        double maxEnergy = 100.0;
-        TH1D** histograms = new TH1D*[numComponents];
-        TLegend* legend = new TLegend(0.7, 0.7, 0.9, 0.9);
-        for (int i = 0; i < numComponents; ++i) {
-            const string& component = data.getMemberNames()[i];
-            const Json::Value& componentData = data[component];
-            double mean = componentData["mean"].asDouble();
-            double sigma = componentData["sigma"].asDouble();
-            histograms[i] = new TH1D(("component_" + to_string(i)).c_str(), ("Component " + to_string(i)).c_str(), numBins, minEnergy, maxEnergy);
-            histograms[i]->FillRandom("gaus", 1000);
-            histograms[i]->Scale(1000.0 / histograms[i]->GetEntries());
-            histograms[i]->SetLineColor(i + 1);
-            histograms[i]->Draw(i == 0 ? "" : "SAME");
-            legend->AddEntry(histograms[i], ("Component " + to_string(i)).c_str(), "l");
-        }
-        legend->Draw();
-        canvas->Write();
-    }
-    
-    if (dataType == "ComponentsPETimeDistribution") {
-        TH1D* hist = new TH1D("components_pe_time_distribution", "Components PE Time Distribution", 100, 0, 100);
-        for (const auto& component : data.getMemberNames()) {
-            const Json::Value& componentData = data[component];
-            double mean = componentData["mean"].asDouble();
-            double sigma = componentData["sigma"].asDouble();
-            hist->FillRandom("gaus", 1000);
-            hist->SetBinContent(hist->FindBin(mean), hist->GetBinContent(hist->FindBin(mean)) + 1000);
-        }
-        hist->Write();
-    }
-
-    if (dataType == "PETimeDistribution") {
-        TH1D* hist = new TH1D("pe_time_distribution", "PE Time Distribution", 100, 0, 100);
-        for (int i = 0; i < data.size(); ++i) {
-            const Json::Value& point = data[i];
-            double time = point["time"].asDouble();
-            hist->Fill(time);
-        }
-        hist->Write();
-    }
-
-}
-
-outputFile->Close();
-delete outputFile;
-
-return 0;
-}
-
