@@ -1,4 +1,4 @@
-Este es un formato .shw que contiene  12 columnas referentes a la informacion suministrada por Corsika. Las columnas son :                                                                     
+/*Este es un formato .shw que contiene  12 columnas referentes a la informacion suministrada por Corsika. Las columnas son :                                                                     
  primera columna : Id                                                                                                                                   
  segunda columna : px 
  tercera columna : py 
@@ -14,15 +14,37 @@ duodecima columna : prm_phi
 
 Deseo guardar todo en un solo archivo .root que cree un arbol. Que anada el nu,ero del evento y todas las columnas como brachs
 0005 -1.67029e+00 +2.52492e-01 +3.79519e+00 -2.26858e+03 -3.77545e+03 +9.54478e+02 00000001 0703 +1.41286e+02 +22.098 +149.536
+*/
 
 #include <TFile.h>
 #include <TTree.h>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <vector>
+#include <map>
+#include "TFile.h"
+#include "TMath.h"
+#include "TTree.h"
+#include <cmath>
 
 void ConvertToRoot(const std::string& inputFile, const std::string& outputFile) {
     std::ifstream input(inputFile);
     if (!input.is_open()) {
         std::cout << "Error: Failed to open input file." << std::endl;
         return;
+    }
+    std::string line;
+    int totalLines = 0;
+    // Obtener el número total de líneas en el archivo
+    while (std::getline(input, line)) {
+          totalLines++;
+     }
+
+    // Skip header lines
+    for (int i = 0; i < 5; i++) {
+    	//std::string line;
+    	std::getline(input, line);
     }
 
     // Create ROOT file and tree
@@ -52,9 +74,14 @@ void ConvertToRoot(const std::string& inputFile, const std::string& outputFile) 
     tree.Branch("prm_theta", &prm_theta, "prm_theta/D");
     tree.Branch("prm_phi", &prm_phi, "prm_phi/D");
 
-    std::string line;
+    //std::string line;
     int lineNum = 0;
     while (std::getline(input, line)) {
+         // Verificar si es la última línea
+	 if (lineNum == totalLines) {
+	 	continue; // Saltar la última línea
+	 }
+	 
         std::istringstream iss(line);
         if (!(iss >> id >> px >> py >> pz >> x >> y >> z >> shower_id >> prm_id >> prm_energy >> prm_theta >> prm_phi)) {
             std::cout << "Error: Invalid input format at line " << lineNum + 1 << std::endl;
@@ -65,8 +92,7 @@ void ConvertToRoot(const std::string& inputFile, const std::string& outputFile) 
         event = lineNum;
         // Fill the tree with the current event
         tree.Fill();
-
-        lineNum++;
+	lineNum++;
     }
 
     // Write the tree to the file and close it
