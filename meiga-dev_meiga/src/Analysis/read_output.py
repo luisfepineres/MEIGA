@@ -162,8 +162,10 @@ if __name__ == "__main__":
 			plotcfg.get(option)(data)
 			print("Plotting: ", option)
 			plots += 1
+			plt.savefig(f'fig_{option}.png')
 	
 	if plots:
+		print("Figuras guardadas correctamente!")
 		plt.show()
 		# :D
 	else:
