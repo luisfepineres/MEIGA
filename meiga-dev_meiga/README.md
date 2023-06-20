@@ -46,13 +46,14 @@ How to install Boost C++ library on Ubuntu 20.04 or 22.04 : https://linux.how2sh
 ```bash
   sudo apt-get install nlohmann-json-dev
 ```
+```bash
 git clone https://github.com/nlohmann/json.git
 cd json
 cmake .
 make
 sudo make install
 sudo apt-get install nlohmann-json-dev
-
+```
 
 
 - **view3dscene** (or similar) for visualization of .wrl files:
