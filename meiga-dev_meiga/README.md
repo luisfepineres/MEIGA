@@ -311,16 +311,29 @@ The Python script will fetch the output configuration from the configuration fil
 For this example, the `G4WCDSimulator` application was run using the following settings in the `G4WCDSimulator.json` file:
 
 ```JSON
+{
 "Input" : {
-  "Mode" : "UseARTI",
-  "InputFileName" : "../../../src/Documentation/SampleFlux/salida_bga_30.shw",
-   "InputNParticles" : 0
+        "Mode" : "UseARTI",
+        "InputFileName" : "../../../src/Documentation/SampleFlux/salida_bga_30.shw",
+        "InputNParticles" : 0
 },
 "Output" : {
-  "OutputFile" : "./output.json",
-  "SaveInput" : true,
-  "SaveComponentsPETimeDistributions" : true,
-  "SaveEnergy" : true
+        "OutputFile" : "./output.json",
+        "SaveInput" : true,
+        "SaveComponentsPETimeDistributions" : true,
+        "SaveEnergy" : true
+},
+"DetectorList" : "./DetectorList.xml",
+"DetectorProperties" : "./DetectorProperties.xml",
+"Simulation" :{
+        "SimulationMode" : "eFast",
+        "InjectionMode" : "eRandom",
+        "GeoVisOn" : false,
+        "TrajVisOn" : false,
+        "CheckOverlaps" : false,
+        "Verbosity" : 1, 
+        "PhysicsName" : "QGSP_BERT_HP" 
+}
 }
 ```
 
